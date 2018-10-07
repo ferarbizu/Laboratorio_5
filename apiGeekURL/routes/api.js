@@ -47,4 +47,18 @@ router.delete('/V1/Cell/:id', function(req, res, next) {
   res.status(204).send(cell);
 });
 
+
+router.put('/V1/Cell/:id', function(req, res, next) {
+  var id = req.params.id;
+  const cell = cells.cells.find(c => c.id == id);
+  if(!cell) res.status(404).send('No id found');
+  cell.name = req.body.name;
+  cell.screen = req.body.screen
+  cell.memo = req.body.memo
+  cell.bat = req.body.bat
+  cell.ram = req.body.ram
+  cell.img = req.body.img
+  res.status(204).send(req.cell);
+});
+
 module.exports = router;
