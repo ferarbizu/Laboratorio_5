@@ -4,6 +4,7 @@ var mongo = require('mongodb').MongoClient;
 var objectId = require('mongodb').ObjectID;
 var assert = require('assert');
 var url = 'mongodb://localhost:27017/Cells';
+var autoIncrement = require("mongodb-autoincrement");
 var db;
 
 router.get('/V1/Cell/', function(req, res, next) {
@@ -20,33 +21,33 @@ router.get('/V1/Cell/', function(req, res, next) {
   });
 });
 
-
 router.post('/V1/Cell/', function(req, res, next) {
-  const cell = {
-    name:req.body.name
-    ,screen:req.body.screen
-    ,memo:req.body.memo
-    ,bat:req.body.bat
-    ,ram:req.body.ram
-    ,img:req.body.img
-  }
   mongo.connect(url, function(err, client) {
     if(!err) {
       console.log("We are connected");
       db = client.db('Cells');
     }
-    db.collection('cells').insertOne(cell, function(err, result){
-      assert.equal(null, err);
-      if (err) return console.log(err)
-      console.log("Item inserted");
-      res.status(201).send(result);
-      client.close();
-    });
+        db.collection('cells').insertOne({
+          name:req.body.name
+          ,screen:req.body.screen
+          ,memo:req.body.memo
+          ,bat:req.body.bat
+          ,ram:req.body.ram
+          ,img:req.body.img
+        }, function(err, result){
+          assert.equal(null, err);
+          if (err) return console.log(err)
+          console.log("Item inserted");
+          res.status(201).send(result);
+          client.close();
+        });
+
   });
+  
 });
 
-router.delete('/V1/Cell/:id', function(req, res, next) {
-  var id = req.params.id;
+router.delete('/V1/Cell/', function(req, res, next) {
+  var id = req.body.id;
   mongo.connect(url, function(err, client) {
     if(!err) {
       console.log("We are connected");
@@ -63,8 +64,8 @@ router.delete('/V1/Cell/:id', function(req, res, next) {
 });
 
 
-router.put('/V1/Cell/:id', function(req, res, next) {
-  var id = req.params.id;
+router.put('/V1/Cell/', function(req, res, next) {
+  var id = req.body._id;
   const item = {
     name : req.body.name,
     screen : req.body.screen,
