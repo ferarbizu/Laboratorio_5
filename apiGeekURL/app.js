@@ -4,10 +4,19 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors');
-
+var cache = require('express-redis-cache')({
+  port: 6379,
+  host: 'localhost',
+  authPass: null,
+  db: 0,
+  prefix: 'cells',
+  enabled: true,
+  excludeStatuscodes: [404, 406, 408, 410], // disable response caching based on response statuscode. Possible values: number, array, function (excludes 500 and higher by default)
+});
 var usersRouter = require('./routes/api');
 
 var app = express();
+app.set('cache', cache);
 app.use(cors());
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

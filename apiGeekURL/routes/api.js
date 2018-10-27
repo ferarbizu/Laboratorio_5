@@ -4,23 +4,23 @@ var mongo = require('mongodb').MongoClient;
 var objectId = require('mongodb').ObjectID;
 var assert = require('assert');
 var url = 'mongodb://localhost:27017/Cells';
-var autoIncrement = require("mongodb-autoincrement");
+var redis = require("redis");
+var redis_client = redis.createClient();
 var db;
 
-router.get('/V1/Cell/', function(req, res, next) {
-  mongo.connect(url, function(err, client) {
-    if(!err) {
-      console.log("We are connected");
-      db = client.db('Cells');
-    }
-    db.collection('cells').find().toArray((err, result) => {
-      if (err) return console.log(err)
-      res.send({cells: result})
-      client.close();
-    });
+router.get('/V1/Cell/',function(req, res, next) {
+      mongo.connect(url, function(err, client) {
+        if(!err) {
+          console.log("We are connected");
+          db = client.db('Cells');
+        }
+        db.collection('cells').find().toArray((err, result) => {
+          if (err) return console.log(err)
+          res.send({cells: result})
+          client.close();
+        });
   });
 });
-
 router.post('/V1/Cell/', function(req, res, next) {
   mongo.connect(url, function(err, client) {
     if(!err) {
@@ -38,6 +38,8 @@ router.post('/V1/Cell/', function(req, res, next) {
           assert.equal(null, err);
           if (err) return console.log(err)
           console.log("Item inserted");
+          redis_insert(result.insertedId,result.ops[0]);
+          console.log(result.insertedId);
           res.status(201).send(result);
           client.close();
         });
@@ -48,6 +50,7 @@ router.post('/V1/Cell/', function(req, res, next) {
 
 router.delete('/V1/Cell/', function(req, res, next) {
   var id = req.body.id;
+  redis_delete(id);
   mongo.connect(url, function(err, client) {
     if(!err) {
       console.log("We are connected");
@@ -87,5 +90,18 @@ router.put('/V1/Cell/', function(req, res, next) {
     });
   });
 });
+
+function redis_insert(id,object)
+{
+  console.log("Record from redis inserted");
+  redis_client.set(id, JSON.stringify(object), redis.print);
+}
+
+function redis_delete(id)
+{
+  console.log("Record from redis deleted"); 
+  redis_client.del(id);
+}
+
 
 module.exports = router;
