@@ -8,7 +8,7 @@ var redis = require("redis");
 var redis_client = redis.createClient();
 var db;
 
-router.get('/V1/Cell/',function(req, res, next) {
+router.get('/V1/Cell/', function(req, res, next) {
       mongo.connect(url, function(err, client) {
         if(!err) {
           console.log("We are connected");
